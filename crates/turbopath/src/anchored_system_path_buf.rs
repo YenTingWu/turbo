@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-use crate::{AbsoluteSystemPathBuf, IntoSystem, PathValidationError};
+use crate::{AbsoluteSystemPathBuf, IntoSystem, PathError, PathValidationError};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize)]
 pub struct AnchoredSystemPathBuf(PathBuf);
@@ -33,7 +33,7 @@ impl AnchoredSystemPathBuf {
         Ok(AnchoredSystemPathBuf(stripped_path))
     }
 
-    pub fn from_raw<P: AsRef<Path>>(raw: P) -> Result<Self, PathValidationError> {
+    pub fn from_raw<P: AsRef<Path>>(raw: P) -> Result<Self, PathError> {
         let system_path = raw.as_ref();
         let system_path = system_path.into_system()?;
         Ok(Self(system_path))

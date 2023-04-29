@@ -169,6 +169,10 @@ impl AbsoluteSystemPathBuf {
         }
     }
 
+    pub fn create_dir(&self) -> Result<(), io::Error> {
+        fs::create_dir_all(self.0.as_path())
+    }
+
     pub fn remove(&self) -> Result<(), io::Error> {
         fs::remove_file(self.0.as_path())
     }
