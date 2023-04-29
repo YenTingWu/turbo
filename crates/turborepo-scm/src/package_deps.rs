@@ -1,40 +1,57 @@
-use std::{collections::HashMap, process::Command};
+use std::{
+    collections::HashMap,
+    io::BufReader,
+    process::{Command, Stdio},
+};
 
-use anyhow::Result;
-use turbopath::{AbsoluteSystemPathBuf, AnchoredSystemPathBuf, RelativeSystemPathBuf};
+use anyhow::{anyhow, Result};
+use turbopath::{
+    AbsoluteSystemPathBuf, AnchoredSystemPathBuf, RelativeSystemPathBuf, RelativeUnixPathBuf,
+};
+
+type GitHashes = HashMap<RelativeUnixPathBuf, String>;
 
 pub fn get_package_deps(
     turbo_root: &AbsoluteSystemPathBuf,
     package_path: &AnchoredSystemPathBuf,
     inputs: &[&str],
-) -> Result<HashMap<RelativeSystemPathBuf, String>> {
-    if inputs.len() == 0 {
+) -> Result<GitHashes> {
+    let result = if inputs.len() == 0 {
+        let full_pkg_path = turbo_root.resolve(package_path);
+        git_ls_tree(&full_pkg_path)?
     } else {
         unimplemented!()
+    };
+    Ok(result)
+}
+
+fn git_ls_tree(root_path: &AbsoluteSystemPathBuf) -> Result<GitHashes> {
+    let mut git = Command::new("git")
+        .args(&["ls-tree", "-r", "-z", "HEAD"])
+        .current_dir(root_path)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+    {
+        let stdout = git
+            .stdout
+            .as_mut()
+            .ok_or_else(|| anyhow!("failed to get stdout for git ls-tree"))?;
+        let reader = BufReader::new(stdout);
     }
-    Ok(HashMap::default())
+    git.wait()?;
+    unimplemented!()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    //use git2::{Oid, Repository};
-
     fn tmp_dir() -> Result<(tempfile::TempDir, AbsoluteSystemPathBuf)> {
         let tmp_dir = tempfile::tempdir()?;
         let dir = AbsoluteSystemPathBuf::new(tmp_dir.path().to_path_buf())?;
         Ok((tmp_dir, dir))
     }
-
-    // fn setup_repository(repo_root: &AbsoluteSystemPathBuf) -> Result<Repository>
-    // {     let repo = Repository::init(repo_root.as_path())?;
-    //     let mut config = repo.config()?;
-    //     config.set_str("user.name", "test")?;
-    //     config.set_str("user.email", "test@example.com")?;
-
-    //     Ok(repo)
-    // }
 
     fn require_git_cmd(repo_root: &AbsoluteSystemPathBuf, args: &[&str]) {
         let mut cmd = Command::new("git");
@@ -125,11 +142,11 @@ mod tests {
         Ok(())
     }
 
-    fn to_hash_map(pairs: &[(&str, &str)]) -> HashMap<RelativeSystemPathBuf, String> {
-        let pairs: Vec<(RelativeSystemPathBuf, String)> = pairs
-            .into_iter()
-            .map(|(path, hash)| (RelativeSystemPathBuf::new(path).unwrap(), hash.to_string()))
-            .collect::<Vec<_>>();
-        HashMap::from_iter(pairs.into_iter())
+    fn to_hash_map(pairs: &[(&str, &str)]) -> GitHashes {
+        HashMap::from_iter(
+            pairs
+                .into_iter()
+                .map(|(path, hash)| (RelativeUnixPathBuf::new_unchecked(path), hash.to_string())),
+        )
     }
 }

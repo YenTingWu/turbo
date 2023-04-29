@@ -36,6 +36,10 @@ impl RelativeUnixPathBuf {
         Ok(RelativeUnixPathBuf(path.into_unix()?))
     }
 
+    pub fn new_unchecked(raw: impl Into<PathBuf>) -> Self {
+        Self(raw.into())
+    }
+
     pub fn as_path(&self) -> &Path {
         &self.0
     }
