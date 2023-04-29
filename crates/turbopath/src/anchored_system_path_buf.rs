@@ -33,6 +33,12 @@ impl AnchoredSystemPathBuf {
         Ok(AnchoredSystemPathBuf(stripped_path))
     }
 
+    pub fn from_raw<P: AsRef<Path>>(raw: P) -> Result<Self, PathValidationError> {
+        let system_path = raw.as_ref();
+        let system_path = system_path.into_system()?;
+        Ok(Self(system_path))
+    }
+
     pub fn as_path(&self) -> &Path {
         self.0.as_path()
     }

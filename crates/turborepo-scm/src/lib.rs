@@ -8,6 +8,7 @@ use thiserror::Error;
 use turbopath::PathValidationError;
 
 pub mod git;
+pub mod package_deps;
 
 #[derive(Debug, Error)]
 pub enum Error {
