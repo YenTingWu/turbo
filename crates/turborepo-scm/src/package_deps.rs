@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    io::BufReader,
+    io::{BufRead, BufReader},
     process::{Command, Stdio},
 };
 
@@ -38,6 +38,13 @@ fn git_ls_tree(root_path: &AbsoluteSystemPathBuf) -> Result<GitHashes> {
             .as_mut()
             .ok_or_else(|| anyhow!("failed to get stdout for git ls-tree"))?;
         let reader = BufReader::new(stdout);
+        let mut buffer = Vec::new();
+        loop {
+            let bytes_read = reader.read_until('\0', &mut buffer)?;
+            if bytes_read == 0 {
+                break;
+            }
+        }
     }
     git.wait()?;
     unimplemented!()
