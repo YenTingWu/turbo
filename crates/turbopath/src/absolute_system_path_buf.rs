@@ -7,7 +7,9 @@ use std::{
 
 use serde::Serialize;
 
-use crate::{AnchoredSystemPathBuf, IntoSystem, PathValidationError, RelativeSystemPathBuf};
+use crate::{
+    AnchoredSystemPathBuf, IntoSystem, PathValidationError, RelativeSystemPathBuf, RelativeUnixPath,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize)]
 pub struct AbsoluteSystemPathBuf(PathBuf);
@@ -115,6 +117,11 @@ impl AbsoluteSystemPathBuf {
     /// ```
     pub fn resolve(&self, path: &AnchoredSystemPathBuf) -> AbsoluteSystemPathBuf {
         AbsoluteSystemPathBuf(self.0.join(path.as_path()))
+    }
+
+    pub fn join_unix_path(&self, unix_path: &RelativeUnixPath) -> AbsoluteSystemPathBuf {
+        let tail = unix_path.to_system_path();
+        AbsoluteSystemPathBuf(self.0.join(tail.as_path()))
     }
 
     pub fn as_path(&self) -> &Path {

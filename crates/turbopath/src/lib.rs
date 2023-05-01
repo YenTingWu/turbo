@@ -3,7 +3,7 @@
 mod absolute_system_path_buf;
 mod anchored_system_path_buf;
 mod relative_system_path_buf;
-mod relative_unix_path_buf;
+mod relative_unix_path;
 
 use std::path::{Path, PathBuf};
 
@@ -11,7 +11,7 @@ pub use absolute_system_path_buf::AbsoluteSystemPathBuf;
 pub use anchored_system_path_buf::AnchoredSystemPathBuf;
 use path_slash::{PathBufExt, PathExt};
 pub use relative_system_path_buf::RelativeSystemPathBuf;
-pub use relative_unix_path_buf::RelativeUnixPathBuf;
+pub use relative_unix_path::RelativeUnixPath;
 use thiserror::Error;
 
 // Custom error type for path validation errors

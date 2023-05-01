@@ -1,11 +1,6 @@
-use std::{
-    backtrace::Backtrace,
-    collections::HashSet,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use std::{backtrace::Backtrace, collections::HashSet, path::PathBuf, process::Command};
 
-use turbopath::{AbsoluteSystemPathBuf, AnchoredSystemPathBuf};
+use turbopath::{AbsoluteSystemPathBuf, AnchoredSystemPathBuf, RelativeUnixPath};
 
 use crate::Error;
 
@@ -102,9 +97,9 @@ fn add_files_from_stdout(
 ) {
     let stdout = String::from_utf8(stdout).unwrap();
     for line in stdout.lines() {
-        let path = Path::new(line);
+        let path: RelativeUnixPath = line.into();
         let anchored_to_turbo_root_file_path =
-            reanchor_path_from_git_root_to_turbo_root(git_root, turbo_root, path).unwrap();
+            reanchor_path_from_git_root_to_turbo_root(git_root, turbo_root, &path).unwrap();
         files.insert(
             anchored_to_turbo_root_file_path
                 .to_str()
@@ -117,10 +112,9 @@ fn add_files_from_stdout(
 fn reanchor_path_from_git_root_to_turbo_root(
     git_root: &AbsoluteSystemPathBuf,
     turbo_root: &AbsoluteSystemPathBuf,
-    path: &Path,
+    path: &RelativeUnixPath,
 ) -> Result<AnchoredSystemPathBuf, Error> {
-    let anchored_to_git_root_file_path: AnchoredSystemPathBuf = path.try_into()?;
-    let absolute_file_path = git_root.resolve(&anchored_to_git_root_file_path);
+    let absolute_file_path = git_root.join_unix_path(path);
     let anchored_to_turbo_root_file_path = turbo_root.anchor(&absolute_file_path)?;
     Ok(anchored_to_turbo_root_file_path)
 }
