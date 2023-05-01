@@ -9034,6 +9034,7 @@ dependencies = [
  "anyhow",
  "dunce",
  "git2 0.16.1",
+ "nom",
  "tempfile",
  "thiserror",
  "turbopath",
