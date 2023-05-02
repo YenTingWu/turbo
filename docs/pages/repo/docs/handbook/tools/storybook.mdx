@@ -187,6 +187,18 @@ The last thing that we need to do is make sure that Storybook is lined up with t
 }
 ```
 
+If you're using Storybook 7, your tasks should be
+
+```json filename="apps/workshop/package.json"
+{
+  // ...
+  "scripts": {
+    "dev": "sb dev",
+    "build": "sb build"
+  }
+}
+```
+
 To ensure build caching, you'll first need to add `storybook-static` to your `.gitignore`. Then, add `storybook-static` to the outputs of your `turbo.json` build task:
 
 ```json filename="turbo.json"
